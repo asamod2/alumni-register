@@ -244,9 +244,12 @@
                     <p>Thank you for registering! Your information has been securely saved and you can now be found in the alumni directory.</p>
                 </div>
                 
-                <!-- Netlify Form with data-netlify attribute -->
+                <!-- Netlify Form with inline success handling -->
                 <form name="alumni-registration" method="POST" data-netlify="true" data-netlify-recaptcha="true" id="alumniForm">
                     <input type="hidden" name="form-name" value="alumni-registration">
+                    
+                    <!-- Custom success message -->
+                    <input type="hidden" name="success_message" value="Thank you for registering! Your information has been securely saved in our alumni directory.">
                     
                     <div class="form-grid">
                         <div class="form-group">
