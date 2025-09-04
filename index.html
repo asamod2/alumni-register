@@ -307,7 +307,7 @@
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('register')">📝 Register</button>
                 <button class="tab" onclick="switchTab('directory')">👥 Alumni Directory</button>
-                <button class="tab" onclick="switchTab('admin')"⚙️ Admin</button>
+                <button class="tab" onclick="switchTab('admin')">⚙️ Admin</button>
             </div>
             
             <!-- Register Tab -->
@@ -590,6 +590,11 @@
         
         // Clear all data (admin only with security)
         function clearAllData() {
+            if (!isAdmin) {
+                alert("Admin access required!");
+                return;
+            }
+            
             if (alumni.length === 0) {
                 alert('No data to clear!');
                 return;
