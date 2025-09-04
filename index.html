@@ -155,22 +155,10 @@
             background: #545b62;
         }
         
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .search-bar {
@@ -253,51 +241,38 @@
             margin: 0;
         }
         
+        .success-message, .error-message, .loading-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
         .success-message {
             background: #d4edda;
             color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
             border-left: 5px solid #28a745;
-            display: none;
-        }
-        
-        .login-box {
-            max-width: 400px;
-            margin: 50px auto;
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .admin-dashboard {
-            background: #e7f5e7;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 5px solid #28a745;
-        }
-        
-        .admin-data-card {
-            background: #f8f9fa;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border-left: 5px solid #28a745;
-            font-size: 14px;
-            line-height: 1.6;
         }
         
         .error-message {
-            color: #dc3545;
             background: #f8d7da;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            display: none;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .loading-message {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .setup-notice {
+            background: #fdf2e9;
+            color: #8a4a0a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #fd7e14;
         }
         
         @media (max-width: 768px) {
@@ -327,26 +302,49 @@
                  class="school-logo"
                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'45\' fill=\'%23f8f9fa\' stroke=\'%234facfe\' stroke-width=\'3\'/%3E%3Ctext x=\'50\' y=\'35\' text-anchor=\'middle\' fill=\'%234facfe\' font-size=\'12\' font-weight=\'bold\'%3ESchool%3C/text%3E%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' fill=\'%234facfe\' font-size=\'16\' font-weight=\'bold\'%3ELogo%3C/text%3E%3Ctext x=\'50\' y=\'65\' text-anchor=\'middle\' fill=\'%234facfe\' font-size=\'12\' font-weight=\'bold\'%3EHere%3C/text%3E%3C/svg%3E'">
             <h1>Alumni Registration Portal</h1>
-            <p>Connect with fellow alumni while protecting your privacy</p>
+            <p>Powered by Google Sheets - Sync across all devices</p>
         </div>
         
         <div class="content">
+            <!-- Setup Instructions -->
+            <div class="setup-notice">
+                <h4>Setup Required: Connect to Google Sheets</h4>
+                <p><strong>To enable cross-device sync, follow these steps:</strong></p>
+                <ol style="margin: 10px 0; padding-left: 20px;">
+                    <li>Create a Google Sheet with headers: FirstName, LastName, StudentID, GraduationYear, Occupation, CurrentLocation, Email, Phone, CurrentJob, Company, Address, Notes, RegistrationDate</li>
+                    <li>Publish the sheet to the web (File → Publish to the web → Entire Document → CSV)</li>
+                    <li>Get the CSV URL and replace SHEET_URL in the code</li>
+                    <li>Set up a Google Apps Script for form submissions</li>
+                </ol>
+                <p><em>Once configured, registrations will sync across mobile, PC, and all devices!</em></p>
+            </div>
+            
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('register')">Register</button>
                 <button class="tab" onclick="switchTab('directory')">Alumni Directory</button>
-                <button class="tab" onclick="switchTab('admin')">Admin Access</button>
+                <button class="tab" onclick="switchTab('setup')">Setup Guide</button>
             </div>
             
             <!-- Register Tab -->
             <div id="register" class="tab-content active">
                 <div class="privacy-notice">
                     <h4>Your Privacy is Protected</h4>
-                    <p>Only your name and graduation year will be visible in the public directory. All other information is kept private and only accessible to school administrators.</p>
+                    <p>Data is stored in a secure Google Sheet. Only your name and graduation year are visible in the public directory.</p>
+                </div>
+                
+                <div id="loadingMessage" class="loading-message">
+                    <h4>Submitting Registration...</h4>
+                    <p>Please wait while we save your information to the database.</p>
                 </div>
                 
                 <div id="successMessage" class="success-message">
                     <h4>Registration Successful!</h4>
-                    <p>Thank you for registering! Your information has been saved and you can now be found in the alumni directory.</p>
+                    <p>Your information has been saved and will appear in the directory shortly.</p>
+                </div>
+                
+                <div id="errorMessage" class="error-message">
+                    <h4>Registration Failed</h4>
+                    <p>There was an error saving your information. Please check the setup configuration and try again.</p>
                 </div>
                 
                 <form id="alumniForm">
@@ -412,7 +410,7 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">Register in Directory</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Register in Directory</button>
                     <button type="reset" class="btn btn-secondary">Clear Form</button>
                 </form>
             </div>
@@ -420,95 +418,85 @@
             <!-- Alumni Directory Tab -->
             <div id="directory" class="tab-content">
                 <div class="stats">
-                    <h3 id="totalCount">0</h3>
+                    <h3 id="totalCount">-</h3>
                     <p>Registered Alumni</p>
                 </div>
                 
                 <div class="privacy-notice">
                     <h4>Public Directory</h4>
-                    <p>Only names and graduation years are shown here to protect alumni privacy. Complete information is available to administrators only.</p>
+                    <p>Showing names and graduation years only. Complete data is stored securely in Google Sheets.</p>
                 </div>
                 
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Search by name or graduation year...">
                 </div>
                 
+                <button onclick="refreshDirectory()" class="btn btn-secondary" style="margin-bottom: 20px;">Refresh Directory</button>
+                
                 <div id="alumniContainer" class="alumni-grid">
                     <div class="no-results">
-                        <h3>No alumni registered yet</h3>
-                        <p>Be the first to register and connect with fellow alumni!</p>
+                        <h3>Loading Alumni Directory...</h3>
+                        <p>Please wait while we load the latest data from Google Sheets.</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Admin Access Tab -->
-            <div id="admin" class="tab-content">
-                <!-- Admin Login -->
-                <div id="adminLogin" class="login-box">
-                    <h3 style="color: #333; margin-bottom: 20px;">Administrator Login</h3>
-                    <p style="color: #666; margin-bottom: 20px;">Enter the admin password to access complete alumni data</p>
-                    
-                    <div class="form-group">
-                        <input type="password" id="adminPassword" placeholder="Admin Password" style="text-align: center;">
-                    </div>
-                    
-                    <button onclick="adminLogin()" class="btn btn-primary">Login</button>
-                    
-                    <div id="loginError" class="error-message">
-                        Incorrect password. Access denied.
-                    </div>
+            <!-- Setup Guide Tab -->
+            <div id="setup" class="tab-content">
+                <h3>Google Sheets Setup Guide</h3>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h4>Step 1: Create Google Sheet</h4>
+                    <p>Create a new Google Sheet with these exact column headers in row 1:</p>
+                    <code style="background: #e9ecef; padding: 5px; border-radius: 3px; font-size: 12px;">
+                        FirstName | LastName | StudentID | GraduationYear | Occupation | CurrentLocation | Email | Phone | CurrentJob | Company | Address | Notes | RegistrationDate
+                    </code>
                 </div>
                 
-                <!-- Admin Dashboard (Hidden) -->
-                <div id="adminDashboard" style="display: none;">
-                    <div class="admin-dashboard">
-                        <h4 style="color: #155724; margin-bottom: 15px;">Administrator Dashboard</h4>
-                        <p style="color: #155724; margin-bottom: 15px;">Welcome! You have access to all alumni data and management tools.</p>
-                        
-                        <button onclick="exportToExcel()" class="btn btn-success">Export Complete Data</button>
-                        <button onclick="viewCompleteData()" class="btn btn-success">View All Details</button>
-                        <button onclick="clearAllData()" class="btn btn-danger">Clear All Data</button>
-                        <button onclick="adminLogout()" class="btn btn-secondary">Logout</button>
-                    </div>
-                    
-                    <div id="completeDataView" style="display: none;">
-                        <h4 style="margin: 20px 0;">Complete Alumni Database</h4>
-                        <div id="completeDataContainer"></div>
-                    </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h4>Step 2: Publish Sheet</h4>
+                    <ol>
+                        <li>In your Google Sheet, go to File → Publish to the web</li>
+                        <li>Select "Entire Document" and "Comma-separated values (.csv)"</li>
+                        <li>Click "Publish" and copy the CSV URL</li>
+                        <li>Replace SHEET_URL in the JavaScript code with your CSV URL</li>
+                    </ol>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h4>Step 3: Create Apps Script (for form submissions)</h4>
+                    <ol>
+                        <li>Go to script.google.com</li>
+                        <li>Create a new project</li>
+                        <li>Replace the code with the provided Apps Script code</li>
+                        <li>Deploy as a web app with "Anyone" access</li>
+                        <li>Copy the web app URL and replace SCRIPT_URL in the code</li>
+                    </ol>
+                </div>
+                
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <h4>Benefits of Google Sheets Backend:</h4>
+                    <ul style="padding-left: 20px;">
+                        <li>True cross-device synchronization</li>
+                        <li>Real-time data updates</li>
+                        <li>Easy admin access through Google Sheets</li>
+                        <li>Automatic backup and version history</li>
+                        <li>Export capabilities built into Google Sheets</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
-        // Configuration
-        const ADMIN_PASSWORD = "Admin2024!";
+        // Configuration - Replace these URLs with your actual Google Sheets URLs
+        const SHEET_URL = 					'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqNKwtHxCaKY9f4iXVhpBt1E0Z4NJALJtpLQuzphdIxNBvx-mK5V8FLpp0Xt3fOOYvqtj4pd45V5Bj/pub?output=csv';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVIg4fJvXwRH6WciqyOcLYLRFS_RdWkak7wFQ7Qx4W2rHhk_JYrbgMBBEVjMUWJ8DN/exec';
         
-        // Data storage with browser persistence
-        let alumni = JSON.parse(localStorage.getItem('alumniData') || '[]');
-        let nextId = parseInt(localStorage.getItem('nextId') || '1');
-        let isAdminLoggedIn = false;
-        
-        // Save data to browser storage
-        function saveData() {
-            localStorage.setItem('alumniData', JSON.stringify(alumni));
-            localStorage.setItem('nextId', nextId.toString());
-        }
-        
-        // Load data on page load
-        function loadData() {
-            alumni = JSON.parse(localStorage.getItem('alumniData') || '[]');
-            nextId = parseInt(localStorage.getItem('nextId') || '1');
-            updateStats();
-            displayPublicDirectory();
-        }
+        let allAlumni = [];
         
         // Tab switching
         function switchTab(tabName) {
-            if (tabName !== 'admin' && isAdminLoggedIn) {
-                adminLogout();
-            }
-            
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
             
@@ -516,46 +504,131 @@
             document.getElementById(tabName).classList.add('active');
             
             if (tabName === 'directory') {
-                displayPublicDirectory();
+                loadAlumniData();
             }
         }
         
-        // Admin login
-        function adminLogin() {
-            const password = document.getElementById('adminPassword').value;
-            const errorDiv = document.getElementById('loginError');
+        // Load alumni data from Google Sheets
+        async function loadAlumniData() {
+            try {
+                if (SHEET_URL === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqNKwtHxCaKY9f4iXVhpBt1E0Z4NJALJtpLQuzphdIxNBvx-mK5V8FLpp0Xt3fOOYvqtj4pd45V5Bj/pub?output=csv') {
+                    document.getElementById('alumniContainer').innerHTML = `
+                        <div class="no-results">
+                            <h3>Setup Required</h3>
+                            <p>Please configure Google Sheets integration in the Setup Guide tab.</p>
+                        </div>
+                    `;
+                    document.getElementById('totalCount').textContent = '0';
+                    return;
+                }
+                
+                const response = await fetch(SHEET_URL);
+                const csvText = await response.text();
+                
+                // Parse CSV data
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',');
+                
+                allAlumni = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim()) {
+                        const values = lines[i].split(',');
+                        const alumni = {
+                            firstName: values[0] || '',
+                            lastName: values[1] || '',
+                            studentId: values[2] || '',
+                            graduationYear: values[3] || '',
+                            occupation: values[4] || '',
+                            currentLocation: values[5] || '',
+                            email: values[6] || '',
+                            phone: values[7] || '',
+                            currentJob: values[8] || '',
+                            company: values[9] || '',
+                            address: values[10] || '',
+                            notes: values[11] || '',
+                            registrationDate: values[12] || ''
+                        };
+                        allAlumni.push(alumni);
+                    }
+                }
+                
+                displayAlumniDirectory();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Error loading alumni data:', error);
+                document.getElementById('alumniContainer').innerHTML = `
+                    <div class="no-results">
+                        <h3>Error Loading Data</h3>
+                        <p>Could not load alumni data from Google Sheets. Please check the configuration.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Display public alumni directory
+        function displayAlumniDirectory(filteredAlumni = null) {
+            const container = document.getElementById('alumniContainer');
+            const alumniToShow = filteredAlumni || allAlumni;
             
-            if (password === ADMIN_PASSWORD) {
-                isAdminLoggedIn = true;
-                document.getElementById('adminLogin').style.display = 'none';
-                document.getElementById('adminDashboard').style.display = 'block';
-                document.getElementById('adminPassword').value = '';
-            } else {
-                errorDiv.style.display = 'block';
-                document.getElementById('adminPassword').value = '';
-                setTimeout(() => {
-                    errorDiv.style.display = 'none';
-                }, 3000);
+            if (alumniToShow.length === 0) {
+                container.innerHTML = filteredAlumni ? 
+                    '<div class="no-results"><h3>No alumni found</h3><p>Try different search terms</p></div>' :
+                    '<div class="no-results"><h3>No alumni registered yet</h3><p>Be the first to register!</p></div>';
+                return;
             }
+            
+            container.innerHTML = alumniToShow.map(alumni => `
+                <div class="alumni-card">
+                    <div class="alumni-name">${alumni.firstName} ${alumni.lastName}</div>
+                    <div class="alumni-year">Class of ${alumni.graduationYear}</div>
+                </div>
+            `).join('');
         }
         
-        // Admin logout
-        function adminLogout() {
-            isAdminLoggedIn = false;
-            document.getElementById('adminLogin').style.display = 'block';
-            document.getElementById('adminDashboard').style.display = 'none';
-            document.getElementById('completeDataView').style.display = 'none';
-            document.getElementById('adminPassword').value = '';
-            document.getElementById('loginError').style.display = 'none';
+        // Refresh directory
+        function refreshDirectory() {
+            loadAlumniData();
         }
+        
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalCount').textContent = allAlumni.length;
+        }
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayAlumniDirectory();
+                return;
+            }
+            
+            const filteredAlumni = allAlumni.filter(alumni => {
+                const name = `${alumni.firstName} ${alumni.lastName}`.toLowerCase();
+                const year = alumni.graduationYear.toString();
+                return name.includes(searchTerm) || year.includes(searchTerm);
+            });
+            
+            displayAlumniDirectory(filteredAlumni);
+        });
         
         // Form submission
-        document.getElementById('alumniForm').addEventListener('submit', function(e) {
+        document.getElementById('alumniForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyVIg4fJvXwRH6WciqyOcLYLRFS_RdWkak7wFQ7Qx4W2rHhk_JYrbgMBBEVjMUWJ8DN/exec') {
+                showError('Please configure Google Apps Script integration in the Setup Guide tab.');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            showLoading();
+            
             const formData = new FormData(e.target);
-            const alumnus = {
-                id: nextId++,
+            const data = {
                 firstName: formData.get('firstName'),
                 lastName: formData.get('lastName'),
                 studentId: formData.get('studentId'),
@@ -571,196 +644,65 @@
                 registrationDate: new Date().toLocaleDateString()
             };
             
-            alumni.push(alumnus);
-            saveData();
-            e.target.reset();
-            
-            // Show success message
-            document.getElementById('successMessage').style.display = 'block';
-            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
-            
-            updateStats();
-        });
-        
-        // Display public directory (names and years only)
-        function displayPublicDirectory(filteredAlumni = null) {
-            const container = document.getElementById('alumniContainer');
-            const alumniToShow = filteredAlumni || alumni;
-            
-            if (alumniToShow.length === 0) {
-                container.innerHTML = filteredAlumni ? 
-                    '<div class="no-results"><h3>No alumni found</h3><p>Try different search terms</p></div>' :
-                    '<div class="no-results"><h3>No alumni registered yet</h3><p>Be the first to register!</p></div>';
-                return;
-            }
-            
-            container.innerHTML = alumniToShow.map(alumnus => `
-                <div class="alumni-card">
-                    <div class="alumni-name">${alumnus.firstName} ${alumnus.lastName}</div>
-                    <div class="alumni-year">Class of ${alumnus.graduationYear}</div>
-                </div>
-            `).join('');
-        }
-        
-        // View complete data (admin only)
-        function viewCompleteData() {
-            if (!isAdminLoggedIn) {
-                alert('Admin access required!');
-                return;
-            }
-            
-            const dataView = document.getElementById('completeDataView');
-            const container = document.getElementById('completeDataContainer');
-            
-            if (alumni.length === 0) {
-                container.innerHTML = '<p>No alumni data available.</p>';
-                dataView.style.display = 'block';
-                return;
-            }
-            
-            container.innerHTML = alumni.map(alumnus => `
-                <div class="admin-data-card">
-                    <h5 style="color: #155724; margin-bottom: 10px;">
-                        ${alumnus.firstName} ${alumnus.lastName} (ID: #${alumnus.id})
-                    </h5>
-                    <div style="color: #666;">
-                        <strong>Student ID:</strong> ${alumnus.studentId || 'N/A'}<br>
-                        <strong>Graduation Year:</strong> ${alumnus.graduationYear}<br>
-                        <strong>Occupation:</strong> ${alumnus.occupation}<br>
-                        <strong>Current Location:</strong> ${alumnus.currentLocation}<br>
-                        <strong>Email:</strong> ${alumnus.email}<br>
-                        <strong>Phone:</strong> ${alumnus.phone || 'N/A'}<br>
-                        <strong>Job Title:</strong> ${alumnus.currentJob || 'N/A'}<br>
-                        <strong>Company:</strong> ${alumnus.company || 'N/A'}<br>
-                        <strong>Address:</strong> ${alumnus.address || 'N/A'}<br>
-                        <strong>Message:</strong> ${alumnus.notes || 'N/A'}<br>
-                        <small><strong>Registered:</strong> ${alumnus.registrationDate}</small>
-                    </div>
-                </div>
-            `).join('');
-            
-            dataView.style.display = 'block';
-        }
-        
-        // Export to Excel
-        function exportToExcel() {
-            if (!isAdminLoggedIn) {
-                alert('Admin access required!');
-                return;
-            }
-            
-            if (alumni.length === 0) {
-                alert('No data to export!');
-                return;
-            }
-            
-            const headers = [
-                'ID', 'First Name', 'Last Name', 'Student ID', 'Graduation Year',
-                'Occupation', 'Current Location', 'Email', 'Phone',
-                'Job Title', 'Company', 'Address', 'Message', 'Registration Date'
-            ];
-            
-            let csvContent = headers.join(',') + '\n';
-            
-            alumni.forEach(alumnus => {
-                const row = [
-                    alumnus.id,
-                    alumnus.firstName || '',
-                    alumnus.lastName || '',
-                    alumnus.studentId || '',
-                    alumnus.graduationYear || '',
-                    alumnus.occupation || '',
-                    alumnus.currentLocation || '',
-                    alumnus.email || '',
-                    alumnus.phone || '',
-                    alumnus.currentJob || '',
-                    alumnus.company || '',
-                    alumnus.address ? alumnus.address.replace(/,/g, ';') : '',
-                    alumnus.notes ? alumnus.notes.replace(/,/g, ';') : '',
-                    alumnus.registrationDate || ''
-                ].map(field => `"${field}"`);
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
                 
-                csvContent += row.join(',') + '\n';
-            });
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'complete_alumni_data_' + new Date().toISOString().split('T')[0] + '.csv';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-            
-            alert('Complete alumni data exported successfully!');
-        }
-        
-        // Clear all data
-        function clearAllData() {
-            if (!isAdminLoggedIn) {
-                alert('Admin access required!');
-                return;
-            }
-            
-            if (alumni.length === 0) {
-                alert('No data to clear!');
-                return;
-            }
-            
-            if (confirm(`DANGER: This will permanently delete all ${alumni.length} alumni records. Are you absolutely sure?`)) {
-                const verification = prompt('Type "DELETE ALL" exactly to confirm:');
-                if (verification === 'DELETE ALL') {
-                    alumni = [];
-                    nextId = 1;
-                    saveData();
-                    displayPublicDirectory();
-                    updateStats();
-                    document.getElementById('completeDataView').style.display = 'none';
-                    alert('All alumni records have been permanently deleted.');
-                } else {
-                    alert('Deletion cancelled - incorrect verification.');
-                }
-            }
-        }
-        
-        // Update statistics
-        function updateStats() {
-            document.getElementById('totalCount').textContent = alumni.length;
-        }
-        
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            if (!searchTerm) {
-                displayPublicDirectory();
-                return;
-            }
-            
-            const filteredAlumni = alumni.filter(alumnus => {
-                const name = `${alumnus.firstName} ${alumnus.lastName}`.toLowerCase();
-                const year = alumnus.graduationYear.toString();
-                return name.includes(searchTerm) || year.includes(searchTerm);
-            });
-            
-            displayPublicDirectory(filteredAlumni);
-        });
-        
-        // Allow Enter key for admin login
-        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                adminLogin();
+                // Since we're using no-cors mode, we can't read the response
+                // but if we get here without error, the request was sent
+                showSuccess();
+                e.target.reset();
+                
+                // Refresh directory after a short delay
+                setTimeout(() => {
+                    loadAlumniData();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showError('Error submitting registration. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
             }
         });
         
-        // Hide success message when form is reset
-        document.querySelector('button[type="reset"]').addEventListener('click', function() {
+        // Show/hide messages
+        function showLoading() {
+            hideAllMessages();
+            document.getElementById('loadingMessage').style.display = 'block';
+        }
+        
+        function showSuccess() {
+            hideAllMessages();
+            document.getElementById('successMessage').style.display = 'block';
+        }
+        
+        function showError(message = 'An error occurred. Please try again.') {
+            hideAllMessages();
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.querySelector('p').textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function hideAllMessages() {
+            document.getElementById('loadingMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // Hide messages when form is reset
+        document.querySelector('button[type="reset"]').addEventListener('click', function() {
+            hideAllMessages();
         });
         
         // Initialize
-        loadData();
+        loadAlumniData();
     </script>
 </body>
 </html>
