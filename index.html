@@ -491,7 +491,7 @@
     <script>
         // Configuration - Replace these URLs with your actual Google Sheets URLs
         const SHEET_URL = 					'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqNKwtHxCaKY9f4iXVhpBt1E0Z4NJALJtpLQuzphdIxNBvx-mK5V8FLpp0Xt3fOOYvqtj4pd45V5Bj/pub?output=csv';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznTSQ1uj8E4XW3guThATkMPi8LY0_VkW6i0xuwsAJ7nq6rEolkKR1KtCN6JtYT1hUs/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUfN2Q_zumyo_d21oG1gsaYbAI1yLu967pAcqdKe2N0Eaik4CPSvrO97hTzt8zWafScg/exec';
         
         let allAlumni = [];
         
@@ -618,7 +618,7 @@
         document.getElementById('alumniForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbznTSQ1uj8E4XW3guThATkMPi8LY0_VkW6i0xuwsAJ7nq6rEolkKR1KtCN6JtYT1hUs/exec') {
+            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwUfN2Q_zumyo_d21oG1gsaYbAI1yLu967pAcqdKe2N0Eaik4CPSvrO97hTzt8zWafScg/exec') {
                 showError('Please configure Google Apps Script integration in the Setup Guide tab.');
                 return;
             }
@@ -706,4 +706,5 @@
     </script>
 </body>
 </html>
+
 
