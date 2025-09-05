@@ -615,51 +615,32 @@
         });
         
         // Form submission
-document.getElementById('alumniForm').addEventListener('submit', async function(e) {
+document.getElementById('alumniForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
     showLoading();
     
+    // Create form data as URL parameters
     const formData = new FormData(e.target);
-    const data = {
-        firstName: formData.get('firstName'),
-        lastName: formData.get('lastName'),
-        studentId: formData.get('studentId'),
-        graduationYear: formData.get('graduationYear'),
-        occupation: formData.get('occupation'),
-        currentLocation: formData.get('currentLocation'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        currentJob: formData.get('currentJob'),
-        company: formData.get('company'),
-        address: formData.get('address'),
-        notes: formData.get('notes'),
-        registrationDate: new Date().toLocaleDateString()
-    };
+    const params = new URLSearchParams(formData);
     
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(data)
-        });
-        
+    // Submit to Google Apps Script
+    fetch(SCRIPT_URL + '?' + params.toString(), {
+        method: 'GET'
+    })
+    .then(() => {
         showSuccess();
         e.target.reset();
-        
-        setTimeout(() => {
-            loadAlumniData();
-        }, 2000);
-        
-    } catch (error) {
-        showError('Error submitting registration. Please try again.');
-    } finally {
+        setTimeout(() => loadAlumniData(), 2000);
+    })
+    .catch(() => {
+        showError('Error submitting registration.');
+    })
+    .finally(() => {
         submitBtn.disabled = false;
-    }
+    });
 });
                 
                 // Since we're using no-cors mode, we can't read the response
@@ -714,6 +695,7 @@ document.getElementById('alumniForm').addEventListener('submit', async function(
     </script>
 </body>
 </html>
+
 
 
 
