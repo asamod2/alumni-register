@@ -491,7 +491,7 @@
     <script>
         // Configuration - Replace these URLs with your actual Google Sheets URLs
         const SHEET_URL = 					'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqNKwtHxCaKY9f4iXVhpBt1E0Z4NJALJtpLQuzphdIxNBvx-mK5V8FLpp0Xt3fOOYvqtj4pd45V5Bj/pub?output=csv';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUfN2Q_zumyo_d21oG1gsaYbAI1yLu967pAcqdKe2N0Eaik4CPSvrO97hTzt8zWafScg/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5HMF6upKV_nPbNXPO_or6rwiikpT5CLx6yNLCTghxoayD7gfumvJxwck9fOQPXXTX8g/exec';
         
         let allAlumni = [];
         
@@ -615,44 +615,52 @@
         });
         
         // Form submission
-        document.getElementById('alumniForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwUfN2Q_zumyo_d21oG1gsaYbAI1yLu967pAcqdKe2N0Eaik4CPSvrO97hTzt8zWafScg/exec') {
-                showError('Please configure Google Apps Script integration in the Setup Guide tab.');
-                return;
-            }
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            showLoading();
-            
-            const formData = new FormData(e.target);
-            const data = {
-                firstName: formData.get('firstName'),
-                lastName: formData.get('lastName'),
-                studentId: formData.get('studentId'),
-                graduationYear: formData.get('graduationYear'),
-                occupation: formData.get('occupation'),
-                currentLocation: formData.get('currentLocation'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                currentJob: formData.get('currentJob'),
-                company: formData.get('company'),
-                address: formData.get('address'),
-                notes: formData.get('notes'),
-                registrationDate: new Date().toLocaleDateString()
-            };
-            
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
+document.getElementById('alumniForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    showLoading();
+    
+    const formData = new FormData(e.target);
+    const data = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        studentId: formData.get('studentId'),
+        graduationYear: formData.get('graduationYear'),
+        occupation: formData.get('occupation'),
+        currentLocation: formData.get('currentLocation'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        currentJob: formData.get('currentJob'),
+        company: formData.get('company'),
+        address: formData.get('address'),
+        notes: formData.get('notes'),
+        registrationDate: new Date().toLocaleDateString()
+    };
+    
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(data)
+        });
+        
+        showSuccess();
+        e.target.reset();
+        
+        setTimeout(() => {
+            loadAlumniData();
+        }, 2000);
+        
+    } catch (error) {
+        showError('Error submitting registration. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+    }
+});
                 
                 // Since we're using no-cors mode, we can't read the response
                 // but if we get here without error, the request was sent
@@ -706,6 +714,7 @@
     </script>
 </body>
 </html>
+
 
 
 
